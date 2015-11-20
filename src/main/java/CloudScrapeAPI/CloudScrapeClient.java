@@ -1,14 +1,20 @@
 package CloudScrapeAPI;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class CloudScrapeClient {
     private String apiKey;
@@ -40,19 +46,25 @@ public class CloudScrapeClient {
     public CloudScrapeResponse request(String url, String method, String body) throws Exception {
         CloseableHttpClient httpClient = HttpClients.createDefault();
 
-        HttpUriRequest httpRequest;
+        HttpPost httpPost = null;
+        HttpGet httpGet = null;
+
+        List<Header> headerList = new ArrayList<Header>();
+        headerList.add(new BasicHeader("X-CloudScrape-Access", DigestUtils.md5Hex(this.accountId + this.apiKey).toLowerCase()));
+        headerList.add(new BasicHeader("X-CloudScrape-Account", this.accountId));
+        headerList.add(new BasicHeader("User-Agent", this.userAgent));
+        headerList.add(new BasicHeader("Accept", "application/json"));
+        headerList.add(new BasicHeader("Content-type", "application/json"));
 
         if (method.equalsIgnoreCase("POST")) {
-            httpRequest = new HttpPost(this.endPoint + url);
+            httpPost = new HttpPost(this.endPoint + url);
+            httpPost.setHeaders(headerList.toArray(new Header[headerList.size()]));
+            StringEntity bodyEntity = new StringEntity(body);
+            httpPost.setEntity(bodyEntity);
         } else {
-            httpRequest = new HttpGet(this.endPoint + url);
+            httpGet = new HttpGet(this.endPoint + url);
+            httpGet.setHeaders(headerList.toArray(new Header[headerList.size()]));
         }
-
-        httpRequest.addHeader("X-CloudScrape-Access", DigestUtils.md5Hex(this.accountId + this.apiKey).toLowerCase());
-        httpRequest.addHeader("X-CloudScrape-Account", this.accountId);
-        httpRequest.addHeader("User-Agent", this.userAgent);
-        httpRequest.addHeader("Accept", "application/json");
-        httpRequest.addHeader("Content-type", "application/json");
 
         String response;
         CloseableHttpResponse httpResponse = null;
@@ -60,7 +72,11 @@ public class CloudScrapeClient {
 
         try
         {
-            httpResponse = httpClient.execute(httpRequest);
+            if (method.equalsIgnoreCase("POST")) {
+                httpResponse = httpClient.execute(httpPost);
+            } else {
+                httpResponse = httpClient.execute(httpGet);
+            }
             HttpEntity entity = httpResponse.getEntity();
             response = EntityUtils.toString(entity);
 

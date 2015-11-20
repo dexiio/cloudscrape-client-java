@@ -35,9 +35,9 @@ public class CloudScrapeRuns {
         return this.gson.fromJson(response, CloudScrapeExecutionDTO.class);
     }
 
-    public CloudScrapeExecutionDTO executeWithInputSync(String runId, String inputs) throws Exception {
+    public CloudScrapeResultDTO executeWithInputSync(String runId, String inputs) throws Exception {
         String response = this.cloudScrapeClient.requestJson("runs/" + runId + "/execute/inputs/wait", "POST", inputs);
-        return this.gson.fromJson(response, CloudScrapeExecutionDTO.class);
+        return this.gson.fromJson(response, CloudScrapeResultDTO.class);
     }
 
     public CloudScrapeResultDTO getLatestResult(String runId) throws Exception {
