@@ -3,10 +3,7 @@ package CloudScrapeAPI;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.methods.*;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -48,6 +45,7 @@ public class CloudScrapeClient {
 
         HttpPost httpPost = null;
         HttpGet httpGet = null;
+        HttpDelete httpDelete = null;
 
         List<Header> headerList = new ArrayList<Header>();
         headerList.add(new BasicHeader("X-CloudScrape-Access", DigestUtils.md5Hex(this.accountId + this.apiKey).toLowerCase()));
@@ -61,6 +59,9 @@ public class CloudScrapeClient {
             httpPost.setHeaders(headerList.toArray(new Header[headerList.size()]));
             StringEntity bodyEntity = new StringEntity(body);
             httpPost.setEntity(bodyEntity);
+        } else if (method.equalsIgnoreCase("DELETE")) {
+            httpDelete = new HttpDelete(this.endPoint + url);
+            httpDelete.setHeaders(headerList.toArray(new Header[headerList.size()]));
         } else {
             httpGet = new HttpGet(this.endPoint + url);
             httpGet.setHeaders(headerList.toArray(new Header[headerList.size()]));
@@ -74,6 +75,8 @@ public class CloudScrapeClient {
         {
             if (method.equalsIgnoreCase("POST")) {
                 httpResponse = httpClient.execute(httpPost);
+            } else if (method.equalsIgnoreCase("DELETE")) {
+                httpResponse = httpClient.execute(httpDelete);
             } else {
                 httpResponse = httpClient.execute(httpGet);
             }
