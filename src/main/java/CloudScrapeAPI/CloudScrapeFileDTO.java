@@ -8,7 +8,7 @@ public class CloudScrapeFileDTO {
         return this.mimeType;
     }
 
-    public void setMimeType(String mimeType) {
+    private void setMimeType(String mimeType) {
         this.mimeType = mimeType;
     }
 
@@ -16,7 +16,7 @@ public class CloudScrapeFileDTO {
         return this.contents;
     }
 
-    public void setContents(String contents) {
+    private void setContents(String contents) {
         this.contents = contents;
     }
 
