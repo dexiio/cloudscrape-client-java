@@ -14,3 +14,11 @@ dependencies {
     compile 'junit:junit:4.12'
     compile 'commons-configuration:commons-configuration:1.10'
 }
+
+jar {
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+
